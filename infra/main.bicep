@@ -20,7 +20,8 @@ param adoPat string = ''
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id, namePrefix))
 var shortSuffix = substring(uniqueSuffix, 0, 6)
 
-var storageAccountName = toLower(substring(replace('${namePrefix}sa${uniqueSuffix}', '-', ''), 0, 24))
+var storageAccountBase = toLower(replace('${namePrefix}sa${uniqueSuffix}', '-', ''))
+var storageAccountName = take(storageAccountBase, 24)
 var workspaceName = '${namePrefix}-law-${substring(uniqueSuffix, 0, 4)}'
 var appInsightsName = '${namePrefix}-appi-${substring(uniqueSuffix, 0, 4)}'
 var planName = '${namePrefix}-plan-${substring(uniqueSuffix, 0, 4)}'
@@ -107,6 +108,6 @@ module functionApp 'br/public:avm/res/web/site:0.19.0' = {
 }
 
 output functionAppName string = functionApp.outputs.name
-output functionAppHostname string = functionApp.outputs.defaultHostName
+output functionAppHostname string = functionApp.outputs.defaultHostname
 output functionAppResourceId string = functionApp.outputs.resourceId
 output storageAccountName string = storage.outputs.name
