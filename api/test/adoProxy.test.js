@@ -18,7 +18,9 @@ test('buildUpstreamUrl rejects traversal', () => {
 });
 
 test('healthz handler returns ok', async () => {
-  const response = await healthzHandler({}, {});
+  const mockRequest = { method: 'GET' };
+  const mockContext = {};
+  const response = await healthzHandler(mockRequest, mockContext);
   assert.equal(response.status, 200);
   assert.equal(response.jsonBody?.ok, true);
 });

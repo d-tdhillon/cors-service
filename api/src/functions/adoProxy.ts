@@ -26,9 +26,20 @@ export function buildUpstreamUrl(org: string, path: string, queryString: string)
 }
 
 const handler: HttpHandler = async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
-  // Note: same-origin proxy; we do not emit CORS headers.
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+  };
+
+  // Handle preflight OPTIONS requests
   if (request.method.toUpperCase() === 'OPTIONS') {
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: corsHeaders,
+    };
   }
 
   const org = getRequiredEnv('ADO_ORG');
@@ -55,6 +66,11 @@ const handler: HttpHandler = async (request: HttpRequest, context: InvocationCon
 
   const responseHeaders = filterDownstreamResponseHeaders(upstreamResponse.headers as any);
   const upstreamBody = await upstreamResponse.arrayBuffer();
+
+  // Add CORS headers to response
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    responseHeaders[key] = value;
+  });
 
   return {
     status: upstreamResponse.status,
