@@ -1,6 +1,6 @@
-import type { HttpHandler, HttpMethod, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import type { HttpHandler, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 
-export const handler: HttpHandler = async (_request: HttpRequest, _context: InvocationContext): Promise<HttpResponseInit> => {
+const handler: HttpHandler = async (_request: HttpRequest, _context: InvocationContext): Promise<HttpResponseInit> => {
   return {
     status: 200,
     jsonBody: { ok: true },
@@ -8,9 +8,4 @@ export const handler: HttpHandler = async (_request: HttpRequest, _context: Invo
   };
 };
 
-export const healthz = {
-  methods: ['GET'] as HttpMethod[],
-  authLevel: 'anonymous' as const,
-  route: 'healthz',
-  handler,
-};
+export default handler;

@@ -1,4 +1,4 @@
-import type { HttpHandler, HttpMethod, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
+import type { HttpHandler, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 
 import { getAdoAuthorizationHeader } from '../shared/adoAuth.js';
 import { getRequiredEnv } from '../shared/env.js';
@@ -25,7 +25,7 @@ export function buildUpstreamUrl(org: string, path: string, queryString: string)
   return `${base}${normalizedPath}${qs}`;
 }
 
-export const handler: HttpHandler = async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+const handler: HttpHandler = async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
   // Note: same-origin proxy; we do not emit CORS headers.
   if (request.method.toUpperCase() === 'OPTIONS') {
     return { status: 204 };
@@ -63,9 +63,4 @@ export const handler: HttpHandler = async (request: HttpRequest, context: Invoca
   };
 };
 
-export const adoProxy = {
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as HttpMethod[],
-  authLevel: 'anonymous' as const,
-  route: 'ado/{*path}',
-  handler,
-};
+export default handler;
