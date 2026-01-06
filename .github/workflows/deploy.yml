@@ -1,0 +1,71 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
+  NAME_PREFIX: corssvc
+  ENVIRONMENT: prod
+  USE_MANAGED_IDENTITY: false
+  ADO_ORG: ${{ secrets.ADO_ORG }}
+  ADO_PAT: ${{ secrets.ADO_PAT }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build API
+        working-directory: api
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy infrastructure (Bicep)
+        uses: azure/cli@v2
+        with:
+          azcliversion: 2.65.0
+          inlineScript: |
+            az deployment group create \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
+              --template-file infra/main.bicep \
+              --parameters infra/main.bicepparam \
+              --parameters location="$AZURE_LOCATION" \
+                           namePrefix="$NAME_PREFIX" \
+                           environment="$ENVIRONMENT" \
+                           adoOrg="$ADO_ORG" \
+                           useManagedIdentity=$USE_MANAGED_IDENTITY \
+                           adoPat="$ADO_PAT" \
+              --query properties.outputs \
+              --output json \
+              > deployment-outputs.json
+
+            echo "FUNCTION_APP_NAME=$(jq -r '.functionAppName.value' deployment-outputs.json)" >> $GITHUB_ENV
+
+      - name: Publish Function App package
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.FUNCTION_APP_NAME }}
+          package: api

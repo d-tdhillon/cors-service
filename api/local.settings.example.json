@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+
+    "ADO_ORG": "your-ado-org",
+
+    // Option A (simple): PAT auth
+    "ADO_PAT": "",
+
+    // Option B (preferred long-term): Managed Identity / Entra ID
+    // If true, the function will request an AAD token for Azure DevOps.
+    // You must grant the identity access in ADO.
+    "ADO_USE_MI": "false"
+  }
+}
