@@ -7,11 +7,13 @@ on:
 
 env:
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
   AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
-  NAME_PREFIX: corssvc
-  ENVIRONMENT: prod
-  USE_MANAGED_IDENTITY: false
+  NAME_PREFIX: ${{ vars.NAME_PREFIX || 'corssvc' }}
+  ENVIRONMENT: ${{ vars.ENVIRONMENT || 'prod' }}
+  USE_MANAGED_IDENTITY: ${{ secrets.USE_MANAGED_IDENTITY || 'false' }}
   ADO_ORG: ${{ secrets.ADO_ORG }}
   ADO_PAT: ${{ secrets.ADO_PAT }}
 
